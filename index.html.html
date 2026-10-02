@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kimetsu Grid - Demon Slayer Streaming Platform</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Plus Jakarta Sans & Cinzel -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        demon: {
+                            red: '#e63946',
+                            crimson: '#9d0208',
+                            dark: '#0b090a',
+                            panel: '#161a1d',
+                            flame: '#ff4d00',
+                            water: '#00b4d8',
+                            thunder: '#ffb703',
+                            mist: '#a8dede',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        cinzel: ['Cinzel', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b090a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #e63946;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ff4d00;
+        }
+
+        /* Glassmorphism Styles */
+        .glass-panel {
+            background: rgba(22, 26, 29, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .glass-nav {
+            background: rgba(11, 9, 10, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(230, 57, 70, 0.2);
+        }
+
+        /* Glowing Text & Effects */
+        .neon-text-red {
+            text-shadow: 0 0 10px rgba(230, 57, 70, 0.8), 0 0 20px rgba(230, 57, 70, 0.4);
+        }
+        .neon-border-red {
+            box-shadow: 0 0 15px rgba(230, 57, 70, 0.4);
+        }
+        
+        /* Custom Animation Glow */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(230, 57, 70, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(230, 57, 70, 0.8); }
+        }
+        .animate-pulse-glow {
+            animation: pulseGlow 3s infinite;
+        }
+
+        /* Green Tanjiro Pattern Gradient Background Overlay */
+        .tanjiro-pattern {
+            background-color: #0b090a;
+            background-image:  radial-gradient(#161a1d 2px, transparent 2px), radial-gradient(#00b4d8 0.5px, #0b090a 2px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            opacity: 0.15;
+        }
+    </style>
+</head>
+<body class="bg-demon-dark text-gray-100 font-sans min-h-screen relative overflow-x-hidden select-none">
+
+    <!-- Fire Particle Canvas -->
+    <canvas id="particleCanvas" class="fixed inset-0 pointer-events-none z-0 opacity-60"></canvas>
+    
+    <!-- Pattern Overlay -->
+    <div class="fixed inset-0 tanjiro-pattern pointer-events-none z-0"></div>
+
+    <!-- HEADER & NAVIGASI -->
+    <header class="fixed top-0 left-0 right-0 z-40 glass-nav transition-all duration-300" id="mainHeader">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            
+            <!-- Logo -->
+            <a href="#" class="flex items-center gap-3 group">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-tr from-demon-crimson via-demon-red to-orange-500 flex items-center justify-center shadow-lg shadow-demon-red/40 group-hover:scale-105 transition-transform">
+                    <i class="fa-solid font-bold text-xl text-white fa-fire-flame-curved"></i>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-cinzel text-lg sm:text-xl font-extrabold tracking-wider text-white neon-text-red">DEMON SLAYER</span>
+                    <span class="text-[10px] tracking-[0.3em] text-demon-red font-bold uppercase -mt-1">KIMETSU GRID</span>
+                </div>
+            </a>
+
+            <!-- Navigation Links (Desktop) -->
+            <nav class="hidden md:flex items-center space-x-1 lg:space-x-6 font-medium text-sm text-gray-300">
+                <a href="#hero" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition-all text-demon-red font-semibold">Beranda</a>
+                <a href="#carousel" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition-all">Film & Arc</a>
+                <a href="#characters" onclick="openCharacterModal()" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition-all flex items-center gap-1.5">
+                    <span>Karakter</span>
+                    <span class="text-[10px] bg-demon-crimson text-white px-1.5 py-0.5 rounded-full uppercase">NEW</span>
+                </a>
+                <a href="#grid" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition-all">Kategori</a>
+                <a href="#pricing" class="px-3 py-2 rounded-lg hover:text-white hover:bg-white/5 transition-all text-amber-400">Paket Akses</a>
+            </nav>
+
+            <!-- Search Bar & Actions -->
+            <div class="flex items-center gap-3">
+                <!-- Search Button / Bar -->
+                <div class="relative hidden sm:block">
+                    <input type="text" id="headerSearchInput" placeholder="Cari film, arc, jurus..." 
+                        class="w-48 lg:w-64 bg-demon-panel/80 border border-gray-700/80 rounded-full py-1.5 pl-9 pr-4 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-demon-red focus:ring-1 focus:ring-demon-red transition-all">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-xs text-gray-400"></i>
+                </div>
+
+                <button onclick="toggleSearchModal()" class="sm:hidden p-2 text-gray-300 hover:text-white">
+                    <i class="fa-solid fa-magnifying-glass text-lg"></i>
+                </button>
+
+                <!-- Auth Buttons -->
+                <button onclick="openAuthModal('login')" class="hidden sm:inline-flex px-4 py-1.5 text-xs font-semibold text-gray-200 hover:text-white border border-gray-700 rounded-full hover:bg-white/10 transition-all">
+                    Masuk
+                </button>
+                <button onclick="openAuthModal('register')" class="px-4 py-1.5 text-xs font-bold text-white bg-gradient-to-r from-demon-crimson to-demon-red hover:from-demon-red hover:to-orange-600 rounded-full shadow-md shadow-demon-red/30 transition-all transform hover:scale-105">
+                    Daftar Pembasmi Iblis
+                </button>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-300 hover:text-white focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl" id="menuIcon"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobileMenu" class="hidden md:hidden glass-panel border-t border-gray-800 px-4 pt-2 pb-6 space-y-3">
+            <a href="#hero" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-demon-red bg-white/5">Beranda</a>
+            <a href="#carousel" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">Film & Arc</a>
+            <a href="#" onclick="toggleMobileMenu(); openCharacterModal()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">Karakter Korps</a>
+            <a href="#grid" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white">Kategori Jurus</a>
+            <a href="#pricing" onclick="toggleMobileMenu()" class="block px-3 py-2 rounded-md text-base font-medium text-amber-400">Paket Langganan</a>
+            <div class="pt-2 border-t border-gray-800 flex gap-2">
+                <button onclick="toggleMobileMenu(); openAuthModal('login')" class="w-1/2 py-2 text-xs font-semibold text-center border border-gray-700 rounded-lg">Masuk</button>
+                <button onclick="toggleMobileMenu(); openAuthModal('register')" class="w-1/2 py-2 text-xs font-semibold text-center bg-demon-red rounded-lg text-white">Daftar</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- SECTION 1: HERO BANNER (THE CINEMATIC EXPERIENCE) -->
+    <section id="hero" class="relative min-h-screen pt-20 flex items-center justify-center overflow-hidden">
+        
+        <!-- Animated Simulated Video Background (Dynamic Ambient Gradient & Canvas Effects) -->
+        <div class="absolute inset-0 z-0">
+            <!-- Simulated Video Trailer Layer -->
+            <div class="absolute inset-0 bg-gradient-to-t from-demon-dark via-demon-dark/60 to-transparent z-10"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-demon-dark via-demon-dark/80 to-transparent z-10"></div>
+            
+            <!-- Dynamic Artwork Banner Background -->
+                <video width="1920" height="1080" autoplay muted loop controls>
+                    <source src="trailer kny.mp4" type="video/mp4">
+                </video>
+
+        </div>
+
+        <!-- Hero Content Overlay -->
+        <div class="relative z-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 lg:py-24">
+            <div class="max-w-2xl space-y-6">
+                <!-- Badge -->
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-demon-crimson/40 border border-demon-red/60 text-demon-red text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+                    <span class="w-2 h-2 rounded-full bg-demon-red animate-ping"></span>
+                    RILIS TERBARU • EKSKLUSIF 4K
+                </div>
+
+                <!-- Main Title -->
+                <h1 class="text-4xl sm:text-6xl lg:text-7xl font-cinzel font-black text-white leading-tight drop-shadow-2xl">
+                    KIMETSU NO YAIBA: <br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-demon-red via-orange-500 to-amber-300 neon-text-red">
+                        INFINITY CASTLE ARC
+                    </span>
+                </h1>
+
+                <!-- Synopsis -->
+                <p class="text-gray-300 text-sm sm:text-base leading-relaxed font-normal drop-shadow-md">
+                    Pertempuran puncak telah dimulai. Tanjiro dan Korps Pembasmi Iblis tertarik masuk ke dalam Kastil Tanpa Batas untuk menghadapi Muzan Kibutsuji dan para Iblis Bulan Upper Rank dalam pertempuran hidup mati.
+                </p>
+
+                <!-- Metadata Row -->
+                <div class="flex flex-wrap items-center gap-4 text-xs font-semibold text-gray-300 pt-2">
+                    <span class="flex items-center gap-1 text-amber-400"><i class="fa-solid fa-star"></i> 5.0 / 5.0</span>
+                    <span>•</span>
+                    <span class="px-2 py-0.5 rounded bg-gray-800 border border-gray-700">2026</span>
+                    <span>•</span>
+                    <span class="px-2 py-0.5 rounded bg-gray-800 border border-gray-700">Ultra HD 4K</span>
+                    <span>•</span>
+                    <span class="text-demon-red">Aksi / Puncak / Supernatural</span>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-4 pt-4">
+                    <button onclick="playTrailer('KIMETSU NO YAIBA: INFINITY CASTLE ARC', 'https://www.youtube.com/embed/I-a8Ma0f1GA?autoplay=1')" 
+                            class="px-8 py-3.5 rounded-xl bg-gradient-to-r from-demon-crimson via-demon-red to-orange-600 hover:from-demon-red hover:to-orange-500 text-white font-bold text-sm tracking-wide shadow-xl shadow-demon-red/40 flex items-center gap-3 transition-all transform hover:-translate-y-0.5 active:translate-y-0">
+                        <i class="fa-solid fa-play text-lg"></i>
+                        <span>Tonton Sekarang</span>
+                    </button>
+                    
+                    <button onclick="openDetailModal('Infinity Castle Arc', 'Saga pertempuran penentu di mana Korps Hashira mengerahkan seluruh kemampuan pernapasan tingkat lanjut untuk menembus benteng pertahanan terakhir Muzan Kibutsuji.')" 
+                            class="px-6 py-3.5 rounded-xl glass-panel hover:bg-white/10 text-gray-200 font-semibold text-sm flex items-center gap-2 border border-gray-600/50 transition-all">
+                        <i class="fa-solid fa-circle-info text-base text-gray-400"></i>
+                        <span>Lihat Detail Arc</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll Down Indicator -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 hidden md:flex flex-col items-center gap-2 opacity-70 hover:opacity-100 transition-opacity">
+            <span class="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Jelajahi Arc</span>
+            <i class="fa-solid fa-chevron-down text-demon-red animate-bounce"></i>
+        </div>
+    </section>
+
+    <!-- SECTION 2: DYNAMIC CAROUSEL (TREN MINGGU INI) -->
+    <section id="carousel" class="py-16 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="flex items-end justify-between mb-8">
+            <div>
+                <div class="flex items-center gap-2 text-demon-red text-xs font-extrabold uppercase tracking-widest">
+                    <i class="fa-solid fa-fire"></i> TERPOPULER
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-cinzel font-bold text-white mt-1">Tren Minggu Ini</h2>
+            </div>
+            
+            <!-- Controls -->
+            <div class="flex items-center gap-2">
+                <button onclick="scrollCarousel(-1)" class="w-10 h-10 rounded-full glass-panel hover:bg-demon-red hover:text-white flex items-center justify-center transition-all text-gray-300">
+                    <i class="fa-solid fa-arrow-left"></i>
+                </button>
+                <button onclick="scrollCarousel(1)" class="w-10 h-10 rounded-full glass-panel hover:bg-demon-red hover:text-white flex items-center justify-center transition-all text-gray-300">
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Horizontal Scrollable Container -->
+        <div id="carouselContainer" class="flex gap-6 overflow-x-auto scrollbar-none scroll-smooth pb-4 pt-2 -mx-2 px-2">
+            
+            <!-- Card 1: Mugen Train -->
+            <div class="min-w-[240px] sm:min-w-[280px] group relative rounded-2xl overflow-hidden glass-panel border border-gray-800 hover:border-demon-red/50 transition-all duration-300 transform hover:-translate-y-2">
+                <div class="aspect-[2/3] w-full relative overflow-hidden">
+                    <img src="movie2.jpg" alt="Mugen Train" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-demon-panel via-transparent to-transparent"></div>
+                    <span class="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-amber-400 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="fa-solid fa-star text-[10px]"></i> 4.9
+                    </span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <span class="text-[10px] font-bold text-demon-red uppercase tracking-wider">Aksi / Drama</span>
+                    <h3 class="font-bold text-base text-white group-hover:text-demon-red transition-colors line-clamp-1">Mugen Train Movie</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2">Perjuangan Rengoku Kyojuro sang Hashira Api menghadapi Enmu dan Iblis Bulan Upper Rank 3 Akaza.</p>
+                    <button onclick="playTrailer('Mugen Train Movie', 'https://www.youtube.com/embed/sAU6Istwz6c?autoplay=1')" class="w-full mt-2 py-2 rounded-lg bg-white/5 hover:bg-demon-red text-gray-200 hover:text-white text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play text-[10px]"></i> Quick Play
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 2: Entertainment District -->
+            <div class="min-w-[240px] sm:min-w-[280px] group relative rounded-2xl overflow-hidden glass-panel border border-gray-800 hover:border-demon-red/50 transition-all duration-300 transform hover:-translate-y-2">
+                <div class="aspect-[2/3] w-full relative overflow-hidden">
+                    <img src="movie3.webp" alt="Entertainment District" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-demon-panel via-transparent to-transparent"></div>
+                    <span class="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-amber-400 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="fa-solid fa-star text-[10px]"></i> 4.8
+                    </span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <span class="text-[10px] font-bold text-demon-thunder uppercase tracking-wider">Aksi / Misteri</span>
+                    <h3 class="font-bold text-base text-white group-hover:text-demon-red transition-colors line-clamp-1">Entertainment District Arc</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2">Misi memukau Tengen Uzui bersama Tanjiro, Zenitsu, dan Inosuke di distrik hiburan Yoshiwara.</p>
+                    <button onclick="playTrailer('Entertainment District Arc', 'https://www.youtube.com/embed/9I530FTbQ6s?autoplay=1')" class="w-full mt-2 py-2 rounded-lg bg-white/5 hover:bg-demon-red text-gray-200 hover:text-white text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play text-[10px]"></i> Quick Play
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 3: Swordsmith Village -->
+            <div class="min-w-[240px] sm:min-w-[280px] group relative rounded-2xl overflow-hidden glass-panel border border-gray-800 hover:border-demon-red/50 transition-all duration-300 transform hover:-translate-y-2">
+                <div class="aspect-[2/3] w-full relative overflow-hidden">
+                    <img src="kimetsu-no-yaiba-swordsmith-village-arc-2023-phone-v0-nnz9k2bnsdla1.webp" alt="Swordsmith Village" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-demon-panel via-transparent to-transparent"></div>
+                    <span class="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-amber-400 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="fa-solid fa-star text-[10px]"></i> 4.7
+                    </span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <span class="text-[10px] font-bold text-demon-mist uppercase tracking-wider">Aksi / Petualangan</span>
+                    <h3 class="font-bold text-base text-white group-hover:text-demon-red transition-colors line-clamp-1">Swordsmith Village Arc</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2">Pertempuran di desa pembuat pedang Nichirin bersama Muichiro Tokito dan Mitsuri Kanroji.</p>
+                    <button onclick="playTrailer('Swordsmith Village Arc', 'https://www.youtube.com/embed/AGLRpL_IHho?autoplay=1')" class="w-full mt-2 py-2 rounded-lg bg-white/5 hover:bg-demon-red text-gray-200 hover:text-white text-xs font-bold transition-colors flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-play text-[10px]"></i> Quick Play
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card 4: Hashira Training -->
+            <div class="min-w-[240px] sm:min-w-[280px] group relative rounded-2xl overflow-hidden glass-panel border border-gray-800 hover:border-demon-red/50 transition-all duration-300 transform hover:-translate-y-2"> 
+                 <div class="aspect-[2/3] w-full relative overflow-hidden"> 
+                        <img src="hashira.jpg" alt="Hashira Training" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"> 
+                            <div class="absolute inset-0 bg-gradient-to-t from-demon-panel via-transparent to-transparent"></div> 
+                            <span class="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-amber-400 text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1"> 
+                        <i class="fa-solid fa-star text-[10px]"></i> 4.6 
+                            </span> 
+            </div> 
+            <div class="p-4 space-y-2"> 
+                <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Pelatihan / Persiapan</span> 
+                <h3 class="font-bold text-base text-white group-hover:text-demon-red transition-colors line-clamp-1">Hashira Training Arc</h3> 
+                <p class="text-xs text-gray-400 line-clamp-2">Latihan intensif seluruh pembasmi iblis di bawah bimbingan langsung para Hashira.</p> 
+            <!-- Contoh Tombol Quick Play -->
+               <button onclick="playTrailer('Demon Slayer Video', 'https://www.youtube.com/embed/rq1tllAUS1I?autoplay=1')" class="w-full mt-2 py-2 rounded-lg bg-demon-red text-white text-xs font-bold flex items-center justify-center gap-2">
+                <i class="fa-solid fa-play text-[10px]"></i> Quick Play
+              </button>
+             </div> 
+            </div>
+
+            <!-- Card 5: Infinity Castle -->
+            <div class="min-w-[240px] sm:min-w-[280px] group relative rounded-2xl overflow-hidden glass-panel border border-demon-red/40 transition-all duration-300 transform hover:-translate-y-2">
+                <div class="aspect-[2/3] w-full relative overflow-hidden">
+                    <img src="movie1.jpeg" alt="Infinity Castle" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-gradient-to-t from-demon-panel via-transparent to-transparent"></div>
+                    <span class="absolute top-3 right-3 bg-demon-red text-white text-xs font-bold px-2 py-1 rounded-md flex items-center gap-1">
+                        <i class="fa-solid fa-star text-[10px]"></i> 5.0
+                    </span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <span class="text-[10px] font-bold text-demon-flame uppercase tracking-wider">Puncak / Perang Akhir</span>
+                    <h3 class="font-bold text-base text-white group-hover:text-demon-red transition-colors line-clamp-1">Infinity Castle Arc</h3>
+                    <p class="text-xs text-gray-400 line-clamp-2">Perang terbuka di Kastil Tanpa Batas menghadapi Muzan dan seluruh Iblis Bulan Upper Rank.</p>
+                    <button onclick="playTrailer('Infinity Castle Arc', 'https://www.youtube.com/embed/x7uLutVRBf?autoplay=1')" class="w-full mt-2 py-2 rounded-lg bg-demon-red text-white text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-lg shadow-demon-red/30">
+                        <i class="fa-solid fa-play text-[10px]"></i> Tonton Sekarang
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 3: LIVE PREVIEW GRID (KATEGORI POPULER) -->
+    <section id="grid" class="py-16 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+            <div>
+                <div class="text-demon-water text-xs font-extrabold uppercase tracking-widest">
+                    <i class="fa-solid fa-swords"></i> JURUS & KATEGORI
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-cinzel font-bold text-white mt-1">Kategori & Arc Pilihan</h2>
+            </div>
+
+            <!-- Zero Reload Category Tabs -->
+            <div class="flex flex-wrap gap-2 glass-panel p-1.5 rounded-xl border border-gray-800">
+                <button onclick="filterGrid('all')" class="cat-btn active border-b-2 border-demon-red bg-white/10 px-4 py-2 rounded-lg text-xs font-bold text-white transition-all">
+                    Semua Arc
+                </button>
+                <button onclick="filterGrid('water')" class="cat-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition-all">
+                    Pernapasan Air
+                </button>
+                <button onclick="filterGrid('flame')" class="cat-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition-all">
+                    Pernapasan Api
+                </button>
+                <button onclick="filterGrid('sun')" class="cat-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition-all">
+                    Pernapasan Matahari
+                </button>
+                <button onclick="filterGrid('demon')" class="cat-btn px-4 py-2 rounded-lg text-xs font-bold text-gray-400 hover:text-white transition-all">
+                    Iblis Upper Rank
+                </button>
+            </div>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="movieGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            <!-- Item 1 -->
+            <div class="grid-item water all group glass-panel rounded-2xl overflow-hidden border border-gray-800 hover:border-demon-water/60 transition-all duration-300">
+                <div class="aspect-video relative overflow-hidden">
+                    <img src="tomioka.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+                    <span class="absolute top-2 left-2 bg-demon-water/90 text-black text-[10px] font-extrabold px-2 py-0.5 rounded">PERNAPASAN AIR</span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <h4 class="font-bold text-white text-sm">Giyu Tomioka vs Akaza</h4>
+                    <p class="text-xs text-gray-400">Teknik Bentuk Kesebelas: Lull (Nagi) dipraktikkan penuh keanggunan.</p>
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-xs text-amber-400 font-bold"><i class="fa-solid fa-star"></i> 4.9</span>
+                       <a href="https://www.youtube.com/watch?v=EDTgTZkXGfc" target="_blank" class="text-xs text-demon-water font-bold hover:underline">Preview Clip →</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 2 -->
+            <div class="grid-item flame all group glass-panel rounded-2xl overflow-hidden border border-gray-800 hover:border-demon-flame/60 transition-all duration-300">
+                <div class="aspect-video relative overflow-hidden">
+                    <img src="maxresdefault.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+                    <span class="absolute top-2 left-2 bg-demon-flame/90 text-white text-[10px] font-extrabold px-2 py-0.5 rounded">PERNAPASAN API</span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <h4 class="font-bold text-white text-sm">Rengoku Kyojuro: Rengoku</h4>
+                    <p class="text-xs text-gray-400">Jurus Rahasia Bentuk Kesembilan yang menggetarkan bumi Mugen Train.</p>
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-xs text-amber-400 font-bold"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <button onclick="playTrailer('Rengoku Flame Breathing Showcase', 'https://www.youtube.com/embed/9p3uVC9mexQ?autoplay=1')" class="text-xs text-demon-flame font-bold hover:underline">Preview Clip →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 3 -->
+            <div class="grid-item sun all group glass-panel rounded-2xl overflow-hidden border border-gray-800 hover:border-demon-red/60 transition-all duration-300">
+                <div class="aspect-video relative overflow-hidden">
+                    <img src="hinogamikagura.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+                    <span class="absolute top-2 left-2 bg-demon-red text-white text-[10px] font-extrabold px-2 py-0.5 rounded">PERNAPASAN MATAHARI</span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <h4 class="font-bold text-white text-sm">Hinokami Kagura: Dragon Sun Halo</h4>
+                    <p class="text-xs text-gray-400">Tarian tarian dewa api Tanjiro memotong para iblis berkecepatan tinggi.</p>
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-xs text-amber-400 font-bold"><i class="fa-solid fa-star"></i> 4.9</span>
+                        <button onclick="playTrailer('Hinokami Kagura Dance', 'https://www.youtube.com/embed/IEfvZijVJrE?autoplay=1')" class="text-xs text-demon-red font-bold hover:underline">Preview Clip →</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Item 4 -->
+            <div class="grid-item demon all group glass-panel rounded-2xl overflow-hidden border border-gray-800 hover:border-purple-600/60 transition-all duration-300">
+                <div class="aspect-video relative overflow-hidden">
+                    <img src="kokushibo.jpg" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
+                    <span class="absolute top-2 left-2 bg-purple-700 text-white text-[10px] font-extrabold px-2 py-0.5 rounded">UPPER RANK 1</span>
+                </div>
+                <div class="p-4 space-y-2">
+                    <h4 class="font-bold text-white text-sm">Kokushibo: Moon Breathing</h4>
+                    <p class="text-xs text-gray-400">Iblis terkuat pemakai Pernapasan Rembulan dengan bilah Nichirin berpedang banyak.</p>
+                    <div class="flex items-center justify-between pt-2">
+                        <span class="text-xs text-amber-400 font-bold"><i class="fa-solid fa-star"></i> 5.0</span>
+                        <button onclick="playTrailer('Kokushibo Showcase', 'https://www.youtube.com/embed/ub35Ibew1-o?autoplay=1')" class="text-xs text-purple-400 font-bold hover:underline">Preview Clip →</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- SECTION 4: PRICING CARD (PAKET AKSES / PEMBELIAN) -->
+    <section id="pricing" class="py-20 relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        <div class="text-center max-w-2xl mx-auto mb-12">
+            <div class="text-amber-400 text-xs font-extrabold uppercase tracking-widest">
+                <i class="fa-solid fa-crown"></i> GABUNG KORPS
+            </div>
+            <h2 class="text-3xl sm:text-4xl font-cinzel font-bold text-white mt-1">Paket Akses Pembasmi Iblis</h2>
+            <p class="text-gray-400 text-sm mt-2">Pilih paket langganan sesuai kebutuhanmu dan nikmati tayangan tanpa gangguan dalam kualitas tertinggi.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            
+            <!-- Paket 1: Mizunoto (Eceran) -->
+            <div class="glass-panel rounded-3xl p-8 border border-gray-800 hover:border-gray-700 transition-all relative flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold border border-blue-500/20">AKSES ECERAN</span>
+                        <i class="fa-solid fa-ticket text-gray-500 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Paket Mizunoto</h3>
+                    <p class="text-xs text-gray-400 mt-1">Sewa satu judul film / arc pilihan selama 7 hari.</p>
+
+                    <div class="my-6">
+                        <span class="text-3xl font-extrabold text-white">Rp 15.000</span>
+                        <span class="text-xs text-gray-400">/ Film</span>
+                    </div>
+
+                    <!-- Benefits List -->
+                    <ul class="space-y-3 text-xs text-gray-300">
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-emerald-400"></i>
+                            <span>Kualitas Tayangan Full HD (1080p)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-emerald-400"></i>
+                            <span>Bebas Iklan Selama Akses</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-gray-500">
+                            <i class="fa-solid fa-xmark text-red-500"></i>
+                            <span>Download Offline (Tidak Tersedia)</span>
+                        </li>
+                        <li class="flex items-center gap-3 text-gray-500">
+                            <i class="fa-solid fa-xmark text-red-500"></i>
+                            <span>Akses Seluruh Katolog (Terbatas 1 Film)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <button onclick="openPaymentModal('Paket Mizunoto', 'Rp 15.000')" class="w-full mt-8 py-3 rounded-xl border border-gray-700 hover:bg-white/10 text-white font-bold text-xs transition-all">
+                    Pilih Paket Mizunoto
+                </button>
+            </div>
+
+            <!-- Paket 2: Hashira (Langganan Bulanan - Highlighted) -->
+            <div class="glass-panel rounded-3xl p-8 border-2 border-demon-red shadow-2xl shadow-demon-red/20 transition-all relative flex flex-col justify-between transform md:-translate-y-2">
+                
+                <!-- Badge Popular -->
+                <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-demon-crimson to-demon-red text-white text-[10px] font-extrabold uppercase px-4 py-1 rounded-full shadow-lg tracking-wider">
+                    REKOMENDASI UTAMA
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="px-3 py-1 rounded-full bg-demon-red/20 text-demon-red text-xs font-bold border border-demon-red/40">VIP FULL ACCESS</span>
+                        <i class="fa-solid fa-crown text-amber-400 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white">Paket Hashira</h3>
+                    <p class="text-xs text-gray-400 mt-1">Akses penuh seluruh film, serial, OVA & konten eksklusif.</p>
+
+                    <div class="my-6">
+                        <span class="text-4xl font-black text-white text-transparent bg-clip-text bg-gradient-to-r from-white to-amber-200">Rp 49.000</span>
+                        <span class="text-xs text-gray-400">/ Bulan</span>
+                    </div>
+
+                    <!-- Benefits List -->
+                    <ul class="space-y-3 text-xs text-gray-200">
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-demon-red font-bold"></i>
+                            <span>Kualitas Ultra HD 4K + HDR & Dolby Atmos</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-demon-red font-bold"></i>
+                            <span>100% Bebas Iklan</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-demon-red font-bold"></i>
+                            <span>Bisa Download Offline Tanpa Batas</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-demon-red font-bold"></i>
+                            <span>Akses Seluruh Series, Movie & OVA Eksklusif</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-check text-demon-red font-bold"></i>
+                            <span>Multi-device (Hingga 4 Layar Sekaligus)</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <button onclick="openPaymentModal('Paket Hashira (VIP)', 'Rp 49.000')" class="w-full mt-8 py-3.5 rounded-xl bg-gradient-to-r from-demon-crimson via-demon-red to-orange-600 hover:from-demon-red hover:to-orange-500 text-white font-bold text-xs tracking-wide shadow-lg shadow-demon-red/40 transition-all">
+                    Berlangganan Paket Hashira
+                </button>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-gray-800 glass-nav pt-12 pb-8 relative z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 pb-8 border-b border-gray-800">
+                <!-- Col 1: About -->
+                <div class="space-y-3">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-fire-flame-curved text-demon-red text-xl"></i>
+                        <span class="font-cinzel font-bold text-white tracking-wider">KIMETSU GRID</span>
+                    </div>
+                    <p class="text-xs text-gray-400 leading-relaxed">
+                        Platform streaming khusus penggemar Demon Slayer (Kimetsu no Yaiba) di Indonesia dengan dukungan kualitas 4K & Audio Imersif.
+                    </p>
+                </div>
+
+                <!-- Col 2: Navigation -->
+                <div>
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Navigasi</h4>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li><a href="#hero" class="hover:text-demon-red transition-colors">Beranda</a></li>
+                        <li><a href="#carousel" class="hover:text-demon-red transition-colors">Film & Arc Utama</a></li>
+                        <li><a href="#grid" class="hover:text-demon-red transition-colors">Kategori Jurus</a></li>
+                        <li><a href="#pricing" class="hover:text-demon-red transition-colors">Paket Akses</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 3: Support -->
+                <div>
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Bantuan & Legal</h4>
+                    <ul class="space-y-2 text-xs text-gray-400">
+                        <li><a href="#" onclick="alert('Korps Pembasmi Iblis adalah organisasi independen pelindung manusia dari ancaman iblis.')" class="hover:text-demon-red transition-colors">Tentang Korps</a></li>
+                        <li><a href="#" onclick="alert('Syarat & Ketentuan berlaku untuk penggunaan konten digital.')" class="hover:text-demon-red transition-colors">Syarat & Ketentuan</a></li>
+                        <li><a href="#" onclick="alert('Hubungi Layanan Bantuan: support@kimetsugrid.id')" class="hover:text-demon-red transition-colors">Bantuan / Kontak</a></li>
+                    </ul>
+                </div>
+
+                <!-- Col 4: Socials -->
+                <div>
+                    <h4 class="text-xs font-bold text-white uppercase tracking-wider mb-3">Ikuti Komunitas</h4>
+                    <div class="flex items-center gap-3">
+                        <a href="#" class="w-9 h-9 rounded-full glass-panel hover:bg-demon-red flex items-center justify-center text-gray-300 hover:text-white transition-all"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full glass-panel hover:bg-demon-red flex items-center justify-center text-gray-300 hover:text-white transition-all"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full glass-panel hover:bg-demon-red flex items-center justify-center text-gray-300 hover:text-white transition-all"><i class="fa-brands fa-x-twitter"></i></a>
+                        <a href="#" class="w-9 h-9 rounded-full glass-panel hover:bg-demon-red flex items-center justify-center text-gray-300 hover:text-white transition-all"><i class="fa-brands fa-discord"></i></a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Payment Badges & Copyright -->
+            <div class="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-gray-500">
+                <p>© 2026 DEMON SLAYER: KIMETSU GRID by Pitraapiw . Hak Cipta Dilindungi.</p>
+
+                <!-- Payment Methods Mockup Badges -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="px-2 py-1 rounded bg-white/5 border border-gray-800 text-[10px] font-bold text-gray-300">QRIS</span>
+                    <span class="px-2 py-1 rounded bg-white/5 border border-gray-800 text-[10px] font-bold text-gray-300">GoPay</span>
+                    <span class="px-2 py-1 rounded bg-white/5 border border-gray-800 text-[10px] font-bold text-gray-300">OVO</span>
+                    <span class="px-2 py-1 rounded bg-white/5 border border-gray-800 text-[10px] font-bold text-gray-300">ShopeePay</span>
+                    <span class="px-2 py-1 rounded bg-white/5 border border-gray-800 text-[10px] font-bold text-gray-300">BCA / MANDIRI / BNI</span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+<!-- Video Player Modal -->
+<div id="videoModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full bg-demon-panel border border-gray-800 rounded-3xl overflow-hidden shadow-2xl relative">
+        <!-- Header Modal -->
+        <div class="p-4 bg-demon-dark flex items-center justify-between border-b border-gray-800">
+            <h3 id="videoModalTitle" class="font-bold text-white text-sm">Trailer Preview</h3>
+            <button onclick="closeVideoModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-demon-red text-white flex items-center justify-center transition-all">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        
+        <!-- Pemutar Video YouTube Asli -->
+        <div class="aspect-video w-full bg-black relative">
+            <iframe id="videoIframe" class="w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+
+        <!-- Footer Modal -->
+        <div class="p-4 bg-demon-dark/80 flex items-center justify-between text-xs text-gray-400">
+            <span>Kualitas: <strong class="text-demon-water">Auto (4K 2160p)</strong></span>
+            <span>Subtitel: <strong class="text-white">Bahasa Indonesia</strong></span>
+        </div>
+    </div>
+</div>
+
+    <!-- MODAL 2: PAYMENT & QRIS MODAL -->
+    <div id="paymentModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-md w-full glass-panel border border-gray-700 rounded-3xl p-6 relative">
+            <button onclick="closePaymentModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center space-y-3">
+                <div class="w-12 h-12 rounded-full bg-demon-red/20 text-demon-red flex items-center justify-center mx-auto text-xl border border-demon-red/40">
+                    <i class="fa-solid fa-qrcode"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white">Pembayaran Akses</h3>
+                <p class="text-xs text-gray-400">Selesaikan transaksi untuk mengaktifkan paket streaming Anda.</p>
+
+                <div class="bg-black/50 p-3 rounded-xl border border-gray-800 text-left space-y-1">
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">Paket:</span>
+                        <span id="payPaketName" class="font-bold text-white">Paket Hashira</span>
+                    </div>
+                    <div class="flex justify-between text-xs">
+                        <span class="text-gray-400">Total Biaya:</span>
+                        <span id="payPaketPrice" class="font-bold text-demon-red">Rp 49.000</span>
+                    </div>
+                </div>
+
+                <!-- QRIS Mockup Image -->
+                <div class="bg-white p-4 rounded-2xl inline-block my-2 shadow-xl">
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=DEMON_SLAYER_GRID_PAYMENT" alt="QRIS Code" class="w-36 h-36">
+                    <span class="text-[9px] font-bold text-gray-800 tracking-widest block mt-1">SCAN VIA ALL E-WALLET / QRIS</span>
+                </div>
+
+                <p class="text-[11px] text-gray-400">Scan QRIS di atas dengan GoPay, OVO, ShopeePay, atau Mobile Banking.</p>
+
+                <button onclick="confirmPayment()" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition-all shadow-lg shadow-emerald-600/30">
+                    Konfirmasi Sudah Bayar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: AUTH MODAL (LOGIN / REGISTER) -->
+    <div id="authModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-sm w-full glass-panel border border-gray-700 rounded-3xl p-6 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="text-center mb-6">
+                <h3 id="authModalTitle" class="text-xl font-bold text-white">Masuk Pembasmi Iblis</h3>
+                <p class="text-xs text-gray-400 mt-1">Gunakan akun Korps Anda untuk melanjutkan.</p>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-gray-300 font-semibold mb-1">Email</label>
+                    <input type="email" required placeholder="tanjiro@korps.id" class="w-full bg-black/60 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-demon-red">
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-300 font-semibold mb-1">Kata Sandi</label>
+                    <input type="password" required placeholder="••••••••" class="w-full bg-black/60 border border-gray-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-demon-red">
+                </div>
+                <button type="submit" class="w-full py-3 rounded-xl bg-demon-red hover:bg-demon-crimson text-white font-bold text-xs transition-all shadow-lg shadow-demon-red/30">
+                    Lanjutkan
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL 4: CHARACTER SPOTLIGHT DRAWER -->
+    <div id="characterModal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="max-w-2xl w-full glass-panel border border-gray-700 rounded-3xl p-6 relative">
+            <button onclick="closeCharacterModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <h3 class="text-xl font-cinzel font-bold text-white mb-4">Sorotan Karakter Korps</h3>
+            
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                <div class="text-center p-3 rounded-xl bg-white/5 border border-gray-800 hover:border-demon-red transition-all">
+                    <div class="w-16 h-16 rounded-full bg-red-900/40 border border-demon-red mx-auto mb-2 flex items-center justify-center text-demon-red text-xl font-bold">🎴</div>
+                    <span class="block text-xs font-bold text-white">Tanjiro Kamado</span>
+                    <span class="text-[10px] text-demon-red">Matahari / Air</span>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-white/5 border border-gray-800 hover:border-demon-thunder transition-all">
+                    <div class="w-16 h-16 rounded-full bg-amber-900/40 border border-amber-500 mx-auto mb-2 flex items-center justify-center text-amber-400 text-xl font-bold">⚡</div>
+                    <span class="block text-xs font-bold text-white">Zenitsu Agatsuma</span>
+                    <span class="text-[10px] text-amber-400">Pernapasan Petir</span>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-white/5 border border-gray-800 hover:border-blue-500 transition-all">
+                    <div class="w-16 h-16 rounded-full bg-blue-900/40 border border-blue-500 mx-auto mb-2 flex items-center justify-center text-blue-400 text-xl font-bold">🐗</div>
+                    <span class="block text-xs font-bold text-white">Inosuke Hashibira</span>
+                    <span class="text-[10px] text-blue-400">Pernapasan Binatang</span>
+                </div>
+                <div class="text-center p-3 rounded-xl bg-white/5 border border-gray-800 hover:border-purple-500 transition-all">
+                    <div class="w-16 h-16 rounded-full bg-purple-900/40 border border-purple-500 mx-auto mb-2 flex items-center justify-center text-purple-400 text-xl font-bold">🎋</div>
+                    <span class="block text-xs font-bold text-white">Nezuko Kamado</span>
+                    <span class="text-[10px] text-purple-400">Iblis / Blood Art</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. Particle Canvas Simulation (Fire & Ember Particles)
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = canvas.height + Math.random() * 100;
+                this.size = Math.random() * 3 + 1;
+                this.speedY = Math.random() * 1.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.8;
+                this.opacity = Math.random() * 0.8 + 0.2;
+                this.color = Math.random() > 0.5 ? '#e63946' : '#ff4d00';
+            }
+            update() {
+                this.y -= this.speedY;
+                this.x += this.speedX;
+                this.opacity -= 0.003;
+                if (this.y < -10 || this.opacity <= 0) {
+                    this.reset();
+                }
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.opacity;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 60; i++) {
+            particles.push(new Particle());
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        // 2. Navigation Mobile Toggle
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // 3. Carousel Scroll Control
+        function scrollCarousel(direction) {
+            const container = document.getElementById('carouselContainer');
+            const scrollAmount = 300;
+            container.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        }
+
+        // 4. Zero Reload Filtering Grid
+        function filterGrid(category) {
+            const items = document.querySelectorAll('.grid-item');
+            const buttons = document.querySelectorAll('.cat-btn');
+
+            buttons.forEach(btn => {
+                btn.classList.remove('active', 'border-b-2', 'border-demon-red', 'bg-white/10', 'text-white');
+                btn.classList.add('text-gray-400');
+            });
+
+            event.target.classList.add('active', 'border-b-2', 'border-demon-red', 'bg-white/10', 'text-white');
+            event.target.classList.remove('text-gray-400');
+
+            items.forEach(item => {
+                if (category === 'all' || item.classList.contains(category)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+// 5. Video Player Modal Logic
+function playTrailer(title, url) {
+    document.getElementById('videoModalTitle').innerText = 'Tonton: ' + title;
+    
+    // Memasukkan URL video ke dalam iframe
+    const iframe = document.getElementById('videoIframe');
+    if (iframe && url) {
+        iframe.src = url;
+    }
+
+    document.getElementById('videoModal').classList.remove('hidden');
+}
+
+function closeVideoModal() {
+    document.getElementById('videoModal').classList.add('hidden');
+    
+    // Mengosongkan link iframe agar video & suara otomatis berhenti saat modal ditutup
+    const iframe = document.getElementById('videoIframe');
+    if (iframe) {
+        iframe.src = '';
+    }
+}
+        // 6. Payment & QRIS Modal Logic
+        function openPaymentModal(paket, price) {
+            document.getElementById('payPaketName').innerText = paket;
+            document.getElementById('payPaketPrice').innerText = price;
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+        function closePaymentModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+        function confirmPayment() {
+            alert('Terima kasih! Pembayaran Anda telah diterima. Akses Paket Korps Anda telah dikonfirmasi dan aktif.');
+            closePaymentModal();
+        }
+
+        // 7. Auth Modal Logic
+        function openAuthModal(mode) {
+            const title = document.getElementById('authModalTitle');
+            title.innerText = mode === 'login' ? 'Masuk Pembasmi Iblis' : 'Daftar Anggota Korps';
+            document.getElementById('authModal').classList.remove('hidden');
+        }
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+        }
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            alert('Autentikasi Berhasil! Selamat datang di Kimetsu Grid.');
+            closeAuthModal();
+        }
+
+        // 8. Character Modal Logic
+        function openCharacterModal() {
+            document.getElementById('characterModal').classList.remove('hidden');
+        }
+        function closeCharacterModal() {
+            document.getElementById('characterModal').classList.add('hidden');
+        }
+
+        // 9. Simple Search Logic
+        document.getElementById('headerSearchInput').addEventListener('keyup', function(e) {
+            const query = e.target.value.toLowerCase();
+            const items = document.querySelectorAll('.grid-item');
+            
+            items.forEach(item => {
+                const text = item.innerText.toLowerCase();
+                if (text.includes(query)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
